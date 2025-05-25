@@ -1,0 +1,30 @@
+services:
+  redis:
+    image: redis:alpine
+    container_name: anonymous_bot_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - bot_network
+  bot:
+    build: .
+    container_name: anonymous_bot
+    depends_on:
+      - redis
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - REDIS_URL=redis://redis:6379
+      - ADMIN_CHAT_ID=${ADMIN_CHAT_ID}
+    restart: unless-stopped
+    networks:
+      - bot_network
+
+volumes:
+  redis_data:
+
+networks:
+  bot_network:
+    driver: bridge
